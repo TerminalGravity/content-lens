@@ -1,6 +1,6 @@
 # Content Lens
 
-[![CI](https://github.com/jackfelke/content-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/jackfelke/content-lens/actions/workflows/ci.yml)
+[![CI](https://github.com/TerminalGravity/content-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/TerminalGravity/content-lens/actions/workflows/ci.yml)
 
 Content Lens is a public, app-extensible post-processing pipeline for turning public content into structured, evidence-backed analysis artifacts. **v1 focuses on YouTube**: metadata, captions/transcripts, optional audio extraction, optional frame sampling, speaker diarization alignment, speaker identity hints, topic chunks, and Markdown/JSON reports.
 
