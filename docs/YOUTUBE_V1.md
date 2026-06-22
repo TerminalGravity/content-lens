@@ -4,7 +4,7 @@
 content-lens analyze URL --out runs/video
 ```
 
-Internally this uses `yt-dlp --ignore-config` to avoid stale global config, downloads English VTT captions when present, normalizes VTT into transcript turns, optionally downloads audio/low-res video, and writes canonical JSON artifacts.
+Internally this uses `yt-dlp --ignore-config` to avoid stale global config, downloads English VTT captions when present, normalizes VTT into transcript turns, optionally downloads audio/low-res video, and writes canonical JSON artifacts plus Markdown/HTML reports.
 
 ## Diarization
 
@@ -29,5 +29,4 @@ Expected shape:
 ## Next v1.x work
 
 - WhisperX/faster-whisper transcription runner.
-- Contact-sheet generation and OCR/vision summarization.
-- HTML report.
+- OCR/vision summarization over sampled frames/contact sheets.

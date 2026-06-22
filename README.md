@@ -1,5 +1,7 @@
 # Content Lens
 
+[![CI](https://github.com/jackfelke/content-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/jackfelke/content-lens/actions/workflows/ci.yml)
+
 Content Lens is a public, app-extensible post-processing pipeline for turning public content into structured, evidence-backed analysis artifacts. **v1 focuses on YouTube**: metadata, captions/transcripts, optional audio extraction, optional frame sampling, speaker diarization alignment, speaker identity hints, topic chunks, and Markdown/JSON reports.
 
 The design separates extraction from interpretation:
@@ -17,7 +19,8 @@ source app -> raw assets -> canonical timeline -> speakers/topics/claims/visuals
 - Optional hooks for `faster-whisper`/WhisperX-style transcripts and `pyannote.audio` diarization output.
 - Built-in optional pyannote diarization runner via `--diarizer pyannote`.
 - Frame sampling hook via `ffmpeg`.
-- Markdown report with timestamps, speakers, topics, questions, and visual evidence slots.
+- Markdown and HTML reports with timestamps, speakers, topics, questions, claims,
+  action items, quotes, and visual evidence slots.
 - App registry so X, Reddit, podcasts, or webpages can be added without changing core processors.
 
 ## Install
@@ -62,9 +65,15 @@ runs/deep/
   transcript.json
   diarization.json
   speakers.json
+  speaker_metrics.json
   topics.json
+  claims.json
+  action_items.json
+  quotes.json
+  terms.json
   timeline.json
   report.md
+  report.html
   assets/
 ```
 

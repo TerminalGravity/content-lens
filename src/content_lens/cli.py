@@ -6,6 +6,13 @@ from pathlib import Path
 
 from content_lens.apps.registry import AppRegistry
 from content_lens.models import dataclass_to_jsonable
+from content_lens.processors.artifacts import (
+    calculate_speaker_metrics,
+    extract_action_items,
+    extract_claims,
+    extract_quotes,
+    extract_top_terms,
+)
 from content_lens.processors.diarization import (
     align_speakers,
     infer_speaker_profiles,
@@ -13,6 +20,7 @@ from content_lens.processors.diarization import (
 )
 from content_lens.processors.pyannote_provider import run_pyannote_diarization
 from content_lens.processors.topics import segment_topics
+from content_lens.reporters.html import render_report as render_html_report
 from content_lens.reporters.markdown import render_report
 
 
@@ -81,18 +89,33 @@ def main(argv: list[str] | None = None) -> int:
         turns = align_speakers(result.transcript, diarization)
         speakers = infer_speaker_profiles(turns, result.metadata.title, result.metadata.description)
         topics = segment_topics(turns, window_seconds=args.topic_window_seconds)
+        claims = extract_claims(turns)
+        action_items = extract_action_items(turns)
+        quotes = extract_quotes(turns)
+        speaker_metrics = calculate_speaker_metrics(turns)
+        terms = extract_top_terms(turns)
 
         write_json(args.out / "metadata.json", result.metadata)
         write_json(args.out / "transcript.json", turns)
         write_json(args.out / "diarization.json", diarization)
         write_json(args.out / "speakers.json", speakers)
         write_json(args.out / "topics.json", topics)
+        write_json(args.out / "claims.json", claims)
+        write_json(args.out / "action_items.json", action_items)
+        write_json(args.out / "quotes.json", quotes)
+        write_json(args.out / "speaker_metrics.json", speaker_metrics)
+        write_json(args.out / "terms.json", terms)
         write_json(
             args.out / "timeline.json",
             {
                 "metadata": result.metadata,
                 "speakers": speakers,
+                "speaker_metrics": speaker_metrics,
                 "topics": topics,
+                "claims": claims,
+                "action_items": action_items,
+                "quotes": quotes,
+                "terms": terms,
                 "turns": turns,
                 "visuals": result.visuals,
                 "assets": result.assets,
@@ -100,6 +123,10 @@ def main(argv: list[str] | None = None) -> int:
         )
         (args.out / "report.md").write_text(
             render_report(result.metadata, turns, speakers, topics, result.visuals),
+            encoding="utf-8",
+        )
+        (args.out / "report.html").write_text(
+            render_html_report(result.metadata, turns, speakers, topics, result.visuals),
             encoding="utf-8",
         )
         print(f"Wrote artifacts to {args.out}")

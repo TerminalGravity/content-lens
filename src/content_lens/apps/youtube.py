@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 from content_lens.apps.base import ContentApp
 from content_lens.models import ExtractionResult, TranscriptTurn, VideoMetadata
+from content_lens.processors.visuals import build_contact_sheet, frame_observations
 from content_lens.processors.vtt import parse_vtt
 
 
@@ -62,6 +63,7 @@ class YouTubeApp(ContentApp):
             if audio:
                 assets["audio"] = str(audio)
 
+        visuals = []
         if sample_frames:
             video = _download_lowres_video(ytdlp, url, assets_dir)
             if video:
@@ -70,8 +72,17 @@ class YouTubeApp(ContentApp):
                 sampled = _sample_frames(video, frame_dir)
                 if sampled:
                     assets["frames_dir"] = str(frame_dir)
+                    visuals = frame_observations(sampled, out_dir)
+                    contact_sheet = build_contact_sheet(sampled, assets_dir / "contact_sheet.jpg")
+                    if contact_sheet:
+                        assets["contact_sheet"] = str(contact_sheet)
 
-        return ExtractionResult(metadata=metadata, transcript=transcript, assets=assets)
+        return ExtractionResult(
+            metadata=metadata,
+            transcript=transcript,
+            visuals=visuals,
+            assets=assets,
+        )
 
 
 def _require_tool(name: str) -> str:

@@ -17,6 +17,8 @@ def test_cli_writes_artifacts_with_diarization(monkeypatch, tmp_path):
             transcript=[
                 TranscriptTurn(0, 2, "Hello"),
                 TranscriptTurn(2, 5, "How do we find speakers?"),
+                TranscriptTurn(5, 8, "This is useful because it improves analysis."),
+                TranscriptTurn(8, 11, "We should ship the pipeline."),
             ],
         )
 
@@ -43,6 +45,11 @@ def test_cli_writes_artifacts_with_diarization(monkeypatch, tmp_path):
         == 0
     )
     assert (out / "timeline.json").exists()
+    assert (out / "report.html").exists()
+    assert (out / "claims.json").exists()
+    assert (out / "action_items.json").exists()
+    assert (out / "speaker_metrics.json").exists()
     report = (out / "report.md").read_text(encoding="utf-8")
     assert "SPEAKER_00" in report
     assert "How do we find speakers?" in report
+    assert "This is useful because it improves analysis." in report
