@@ -83,6 +83,18 @@ and align those segments to transcript turns. This lets users run local pyannote
 
 New apps implement `ContentApp` and return an `ExtractionResult`. See `src/content_lens/apps/base.py` and `docs/ADDING_APPS.md`.
 
+## Design notes
+
+- v1 keeps the CLI synchronous and simple. Long downloads, Whisper/WhisperX, pyannote,
+  and frame extraction are intentionally exposed as explicit steps/artifacts first; progress
+  callbacks and async/job-queue execution are good follow-up work once the artifact contract
+  stabilizes.
+- The YouTube adapter shells out to `yt-dlp --ignore-config` so CLI behavior matches the
+  proven terminal workflow and avoids stale global config. A future adapter can swap in the
+  `yt_dlp` Python API behind the same `ContentApp` boundary.
+- Models are small slotted dataclasses for a stable v1 JSON shape. Extensions should add
+  fields deliberately through the canonical artifacts rather than mutating objects at runtime.
+
 ## Status
 
 This is v1 infrastructure: reliable artifact plumbing, CLI, tests, and YouTube adapter. Heavy ML models are optional so the project remains usable on normal laptops and CI.
