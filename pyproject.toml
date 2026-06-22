@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "content-lens"
+version = "0.1.0"
+description = "Post-processing pipeline for speaker-aware, multimodal analysis of public content sources. YouTube v1."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Jack Felke / TerminalGravity"}]
+keywords = ["youtube", "transcript", "diarization", "speaker", "analysis", "yt-dlp", "whisper", "pyannote"]
+dependencies = []
+
+[project.optional-dependencies]
+youtube = ["yt-dlp>=2025.1.15"]
+transcribe = ["faster-whisper>=1.0.0"]
+diarize = ["pyannote.audio>=3.1.0"]
+visual = ["Pillow>=10.0.0"]
+dev = ["pytest>=8.0", "ruff>=0.8.0", "build>=1.2.0"]
+all = ["yt-dlp>=2025.1.15", "faster-whisper>=1.0.0", "pyannote.audio>=3.1.0", "Pillow>=10.0.0"]
+
+[project.scripts]
+content-lens = "content_lens.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/content_lens"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
