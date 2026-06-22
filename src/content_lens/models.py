@@ -53,6 +53,31 @@ class TopicSegment:
 
 
 @dataclass(slots=True)
+class Quote:
+    text: str
+    speaker: str | None = None
+    start: float | None = None
+    end: float | None = None
+
+
+@dataclass(slots=True)
+class Claim:
+    text: str
+    speaker: str | None = None
+    start: float | None = None
+    end: float | None = None
+    confidence: float | None = None
+
+
+@dataclass(slots=True)
+class ActionItem:
+    text: str
+    owner: str | None = None
+    start: float | None = None
+    end: float | None = None
+
+
+@dataclass(slots=True)
 class VisualObservation:
     time: float
     description: str
@@ -67,6 +92,9 @@ class ExtractionResult:
     diarization: list[DiarizationSegment] = field(default_factory=list)
     visuals: list[VisualObservation] = field(default_factory=list)
     assets: dict[str, str] = field(default_factory=dict)
+    quotes: list[Quote] = field(default_factory=list)
+    claims: list[Claim] = field(default_factory=list)
+    action_items: list[ActionItem] = field(default_factory=list)
 
 
 def dataclass_to_jsonable(value: Any) -> Any:

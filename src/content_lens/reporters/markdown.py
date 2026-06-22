@@ -7,6 +7,7 @@ from content_lens.models import (
     VideoMetadata,
     VisualObservation,
 )
+from content_lens.processors.artifacts import extract_action_items, extract_claims, extract_quotes
 from content_lens.processors.topics import extract_questions
 
 
@@ -65,6 +66,15 @@ def render_report(
     else:
         lines.append("- No transcript topics available.")
 
+    claims = extract_claims(turns)
+    lines.extend(["", "## Claims detected"])
+    if claims:
+        for claim in claims[:20]:
+            speaker = f" {claim.speaker}:" if claim.speaker else ""
+            lines.append(f"- {fmt_time(claim.start or 0)}{speaker} {claim.text}")
+    else:
+        lines.append("- None detected by the lightweight heuristic.")
+
     questions = extract_questions(turns)[:20]
     lines.extend(["", "## Questions / prompts detected"])
     if questions:
@@ -74,10 +84,30 @@ def render_report(
     else:
         lines.append("- None detected by the lightweight heuristic.")
 
+    action_items = extract_action_items(turns)
+    lines.extend(["", "## Action items"])
+    if action_items:
+        for item in action_items:
+            owner = f" ({item.owner})" if item.owner else ""
+            lines.append(f"- [ ]{owner}: {item.text}")
+    else:
+        lines.append("- None detected by the lightweight heuristic.")
+
+    quotes = extract_quotes(turns)
+    lines.extend(["", "## Key quotes"])
+    if quotes:
+        for quote in quotes[:20]:
+            speaker = f" — {quote.speaker}" if quote.speaker else ""
+            timestamp = f" ({fmt_time(quote.start or 0)})" if quote.start is not None else ""
+            lines.append(f"> {quote.text}{speaker}{timestamp}")
+    else:
+        lines.append("- None selected.")
+
     lines.extend(["", "## Visual observations"])
     if visuals:
         for visual in visuals:
-            lines.append(f"- {fmt_time(visual.time)}: {visual.description}")
+            asset = f" — `{visual.asset_path}`" if visual.asset_path else ""
+            lines.append(f"- {fmt_time(visual.time)}: {visual.description}{asset}")
     else:
         lines.append(
             "- No visual observations generated yet. "
