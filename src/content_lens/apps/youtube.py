@@ -94,7 +94,6 @@ def _run(cmd: list[str]) -> subprocess.CompletedProcess[str]:
 
 
 def _download_subtitles(ytdlp: str, url: str, assets_dir: Path) -> Path | None:
-    before = set(assets_dir.glob("*.vtt"))
     cmd = [
         ytdlp,
         "--ignore-config",
@@ -109,12 +108,20 @@ def _download_subtitles(ytdlp: str, url: str, assets_dir: Path) -> Path | None:
         str(assets_dir / "%(id)s.%(ext)s"),
         url,
     ]
+    # yt-dlp can return non-zero for one subtitle variant while still writing a usable VTT.
     try:
         _run(cmd)
     except subprocess.CalledProcessError:
+        pass
+    candidates = sorted(
+        assets_dir.glob("*.vtt"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    if not candidates:
         return None
-    after = set(assets_dir.glob("*.vtt")) - before
-    return sorted(after)[0] if after else None
+    preferred = [path for path in candidates if path.name.endswith(".en.vtt")]
+    return preferred[0] if preferred else candidates[0]
 
 
 def _download_audio(ytdlp: str, url: str, assets_dir: Path) -> Path | None:
