@@ -11,6 +11,7 @@ from content_lens.processors.diarization import (
     infer_speaker_profiles,
     load_diarization_json,
 )
+from content_lens.processors.pyannote_provider import run_pyannote_diarization
 from content_lens.processors.topics import segment_topics
 from content_lens.reporters.markdown import render_report
 
@@ -24,6 +25,17 @@ def build_parser() -> argparse.ArgumentParser:
     analyze.add_argument("--out", type=Path, default=Path("content-lens-run"))
     analyze.add_argument("--download-audio", action="store_true")
     analyze.add_argument("--sample-frames", action="store_true")
+    analyze.add_argument(
+        "--diarizer",
+        choices=["none", "pyannote"],
+        default="none",
+        help="Optional built-in diarization provider. pyannote requires audio + token.",
+    )
+    analyze.add_argument(
+        "--hf-token-env",
+        default="HUGGINGFACE_TOKEN",
+        help="Environment variable containing the Hugging Face token for pyannote.",
+    )
     analyze.add_argument(
         "--diarization-json",
         type=Path,
@@ -48,7 +60,7 @@ def main(argv: list[str] | None = None) -> int:
         result = app.extract(
             args.url,
             args.out,
-            download_audio=args.download_audio,
+            download_audio=args.download_audio or args.diarizer == "pyannote",
             sample_frames=args.sample_frames,
         )
         diarization = (
@@ -56,6 +68,16 @@ def main(argv: list[str] | None = None) -> int:
             if args.diarization_json
             else result.diarization
         )
+        if args.diarizer == "pyannote" and not diarization:
+            audio = result.assets.get("audio")
+            if not audio:
+                raise SystemExit("pyannote diarization needs an extracted audio asset")
+            import os
+
+            diarization = run_pyannote_diarization(
+                Path(audio),
+                hf_token=os.environ.get(args.hf_token_env),
+            )
         turns = align_speakers(result.transcript, diarization)
         speakers = infer_speaker_profiles(turns, result.metadata.title, result.metadata.description)
         topics = segment_topics(turns, window_seconds=args.topic_window_seconds)
