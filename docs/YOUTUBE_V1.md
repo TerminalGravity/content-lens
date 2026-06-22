@@ -8,7 +8,13 @@ Internally this uses `yt-dlp --ignore-config` to avoid stale global config, down
 
 ## Diarization
 
-Run pyannote or another provider separately and pass its segments:
+Run pyannote directly when `pyannote.audio` is installed and `HUGGINGFACE_TOKEN` is set:
+
+```bash
+content-lens analyze URL --out runs/video --diarizer pyannote
+```
+
+Or run pyannote/another provider separately and pass its segments:
 
 ```bash
 content-lens analyze URL --out runs/video --diarization-json pyannote_segments.json
@@ -22,7 +28,6 @@ Expected shape:
 
 ## Next v1.x work
 
-- Built-in pyannote runner gated by `HUGGINGFACE_TOKEN`.
 - WhisperX/faster-whisper transcription runner.
 - Contact-sheet generation and OCR/vision summarization.
 - HTML report.

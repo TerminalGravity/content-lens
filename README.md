@@ -15,6 +15,7 @@ source app -> raw assets -> canonical timeline -> speakers/topics/claims/visuals
 - Canonical JSON artifact format for downstream LLM analysis.
 - Speaker-turn assignment from diarization segments.
 - Optional hooks for `faster-whisper`/WhisperX-style transcripts and `pyannote.audio` diarization output.
+- Built-in optional pyannote diarization runner via `--diarizer pyannote`.
 - Frame sampling hook via `ffmpeg`.
 - Markdown report with timestamps, speakers, topics, questions, and visual evidence slots.
 - App registry so X, Reddit, podcasts, or webpages can be added without changing core processors.
@@ -45,6 +46,14 @@ With visual/audio assets when local tools are installed:
 content-lens analyze URL --out runs/deep --download-audio --sample-frames
 ```
 
+With local pyannote speaker diarization:
+
+```bash
+export HUGGINGFACE_TOKEN=...
+pip install -e '.[youtube,diarize]'
+content-lens analyze URL --out runs/speakers --diarizer pyannote
+```
+
 Outputs:
 
 ```text
@@ -61,13 +70,14 @@ runs/deep/
 
 ## Speaker diarization
 
-Content Lens intentionally keeps diarization provider-specific code behind a small boundary. v1 can consume diarization JSON from pyannote-like segments:
+Content Lens intentionally keeps diarization provider-specific code behind a small boundary.
+v1 can run pyannote locally when installed, or consume diarization JSON from pyannote-like segments:
 
 ```json
 [{"speaker":"SPEAKER_00","start":0.0,"end":4.2}]
 ```
 
-and align those segments to transcript turns. This lets users run local pyannote, hosted APIs, or a future built-in provider and keep the same downstream report format.
+and align those segments to transcript turns. This lets users run local pyannote or hosted APIs and keep the same downstream report format.
 
 ## App/plugin contract
 
